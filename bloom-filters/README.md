@@ -32,11 +32,11 @@ When initializing a Bloom filter, we typically know:
 From these, we derive:
 
 - `m`: number of bits in the bit array  
-  Formula:  
+  Formula:   m = -(n * ln(ε)) / (ln(2)^2)
 
 
 - `k`: number of hash functions  
-Formula:  
+Formula: k = -(ln ε) / ln 2 
 
 
 ---
