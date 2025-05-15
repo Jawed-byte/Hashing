@@ -7,10 +7,15 @@ template<typename T>
 class vector
 {
 private:
-    T* arr;
-    ll cap;
-    ll curr;
+    T* arr;  // Pointer to the dynamic array.
+    ll cap;     // Capacity of the array.
+    ll curr;    // Current number of elements.
 public:
+    /*
+    Constructors:
+    Default: Initializes empty vector.
+    Parametrized: Initializes with a fixed capacity.
+    */
     vector()
     {
         cap = 0;
@@ -23,6 +28,12 @@ public:
         curr = num;
         arr = new T[num];
     }
+
+    /*
+    push_back:
+    If capacity is 0, allocate 1.
+    If array is full, doubles capacity and copies elements.
+    */
     void push_back(T num)
     {
         if(cap==0)
@@ -46,11 +57,14 @@ public:
         arr[curr] = num;
         curr++;
     }
+
+    // pop_back: Removes last element (decreases curr)
     void pop_back()
     {
         if(curr != 0)
             curr--;
     }
+
     ll size()
     {
         return curr;
@@ -97,9 +111,19 @@ public:
 	
 	ll cnt=0;
 	ll cap;
-	double dlf = 1;
+	double dlf = 1; // dlf -> load factor threshold
 
 	// Multiplicative hashing
+
+    /*
+    - Converts the key to a string using a string stream.
+    - This allows the hash function to operate on the string representation of any key type T1.
+    - l is the length of the string s.
+    - ha is initialized with the length. It will accumulate the hash value.
+    - The shifting and XOR operations spread entropy, helping reduce collisions.
+    - It follows a variation of the Mixing Hash technique: it blends the current hash with new information (character + shifted version).
+    - This final step ensures the hash value is within bounds [0, m-1], which is required to index into the array of buckets (of size m).
+    */
 	ll hash(T1 key, ll m) 
 	{
 		ostringstream input;
@@ -117,6 +141,10 @@ public:
 	}
 public:
 	vector<Node*> vec;
+    /*
+    - Initializes the hash table with 5 empty buckets (each a nullptr).
+    - Sets up the basic structure for storing key-value pairs using separate chaining (where collisions are handled by linked lists).
+    */
 	unorderedmap()
 	{
 		cap = 5;
@@ -124,6 +152,22 @@ public:
 	}
 
 	// function 1
+    /*
+    - It returns true if the key was successfully inserted.
+    - It returns false if the key already exists (duplicate key).
+    - Computes the hash of key and reduces it modulo cap (number of buckets).
+    - This gives the index (pos) in the vec array where this key should be inserted.
+    - Traverse the linked list at vec[pos].
+    - If a node with the same key is found, return false — no duplicate keys allowed.
+    - Creates a new node with the given key and value.
+    - Inserts it at the head of the linked list at vec[pos] (common technique in separate chaining).
+    - Updates the bucket's head to point to the new node.
+    - Increments cnt, the count of stored key-value pairs.
+    - Computes the load factor = number of elements / number of buckets.
+    - If it exceeds the threshold dlf (default load factor = 1), it triggers rehashing:
+      - Doubles the capacity.
+      - Re-distributes all existing elements into the new buckets.
+    */
 	bool insert(T1 key, T2 val) 
 	{
 		ll pos = hash(key,cap);
@@ -149,6 +193,19 @@ public:
 		return true;
     }
 
+    /*
+    - This function doubles the capacity of the hash table and re-inserts all existing key-value pairs into the newly sized hash table.
+    - Copies the current vector of buckets (vec) into a temporary vector temp.
+    - We'll use this to access all existing elements before we rebuild the hash table.
+    - cap *= 2: Doubles the number of buckets.
+    - Creates a new vector vec of size cap, with all entries initialized to NULL.
+    - Resets cnt = 0 since we will re-insert all nodes and count them again.
+    - Loops over every old bucket in the temp hash table.
+    - For each node in each linked list:
+        - Extract the key and value.
+        - Call insert(key, val) to re-insert it into the new (larger) table using the updated hash. 
+    */
+
     void rehash() 
 	{
 		vector<Node*> temp = vec;
@@ -171,6 +228,13 @@ public:
 	}
 
 	// function 2
+    /*
+    - Uses the hash function to find the bucket index for key x in the hash table.
+    - If the bucket is empty (NULL), the key does not exist → return false.
+    - check if there's a chain (more than one node)
+    - delete the matched index
+    - If only one node in the bucket and its key matches x, delete it.
+    */
 	bool erase(T1 x)
     {
         ll pos = hash(x,cap);
@@ -209,6 +273,15 @@ public:
     }
 
 	// function 3
+    /*
+    - The function uses a custom hash function to compute the index (pos) where the key x would be located in the hash table (vec), 
+      which is a vector<Node*>.
+    - If the bucket at index pos is empty, the key is definitely not present → return false.
+    - Start with the head node (p) of the linked list at the given bucket.
+    - Traverse the list node by node.
+    - If a node's key matches x, return true.
+    - If the traversal completes without finding x, return false.
+    */
 	bool contains(T1 x)
     {
         ll pos = hash(x,cap);
@@ -228,6 +301,17 @@ public:
     }
 
 	// function 4
+    /*
+    - Check: If the key x already exists in the map (using the contains method).
+    - Find and Return: Traverse the linked list at the hashed bucket to find the matching key 
+      and return a reference to its value (p->val).
+    - Create New Node: If the key is not present, insert a new node with:
+        - key = x
+        - value = T2() → default constructor of the value type
+    - Store it: Place the new node at index pos in the hash table.
+    - Return: A reference to the default-initialized value.
+    */
+
 	T2 &operator[](T1 x)
     {
 		if(contains(x))
@@ -275,6 +359,13 @@ public:
     }
 
 	// function 8
+    /*
+    - Returns: A vector<T1> containing all the keys present in the hash table.
+    - T1 is the key type.
+    - Loop over each bucket in the hash table (vec).
+    - Traverse the linked list in each bucket (to handle collisions via chaining).
+    */
+   
 	vector<T1> keys()
 	{
 		vector<T1> ans;
